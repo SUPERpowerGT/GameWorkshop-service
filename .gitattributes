@@ -1,0 +1,17 @@
+# Global rule: All text files use LF line endings (consistent across Linux/Mac/Windows)
+# Git will NOT convert LF to CRLF when pulling files to local
+* text eol=lf
+
+# Maven Wrapper script (for Linux/Mac) - MUST use LF to ensure executable on Unix-like systems
+/mvnw text eol=lf
+
+# Windows batch files - MUST use CRLF (required for proper execution on Windows)
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Binary files (images, archives, executables) - treat as binary to avoid corruption
+# Git won't process line endings or generate text-based diffs for these
+*.png binary
+*.jpg binary
+*.zip binary
+*.exe binary

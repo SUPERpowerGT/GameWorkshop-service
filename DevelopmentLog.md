@@ -4,6 +4,8 @@
 
 1.注意包名称要小写，不要用段横杠，如果重命名，请务必要全部重构
 
+
+
 2.如果项目没有gravel或者maven可以从spring initialer网站初始化一个项目包，并将包的内容复制到本地，不要忘记重新更新gitignore，具体操作如下：
 
 - 打开网址https://start.spring.io/
@@ -36,9 +38,15 @@
   git push
   ```
 
+
+
 3.mvnw以及mvnw.cmd以及.mvn是用来帮助配置环境保持一致性，建议上传到git上方便配置同步管理
 
+
+
 4.为了更好的方便服务拆分，具有良好的拓展性，选择DDD（领域驱动设计）和微服务架构设计，方便后续拓展
+
+
 
 5.DDD是一种软件设计开发思路，传统从技术出发，DDD从业务出发，具体应用到开发中文件架构更新如下：
 
@@ -139,15 +147,96 @@ gameworkshop-service/
 └── .gitattributes                                     // Git属性配置（换行符等）
 ```
 
+
+
 6.SpringBoot的启动注解是@SpringBootApplication，点开发现里面是主要有另外三个注解来实现，分别用来指定配置以及扫描注解，帮助我们可以通过简单的注解来让spring明白我们的代码架构！
+
+
 
 ### 7.Spring 的核心是 **IoC（控制反转）容器**（需要复习！！！）
 
 
 
-目前完成后端配置以及git管理
+8.git合并分支流程如下：
 
-## 下次任务0913：
+**执行交互式变基命令**
+
+指定要合并的提交范围：`HEAD~3` 表示 “从当前提交往前数 3 个提交”（包含这 3 个）。
+
+```bash
+git rebase -i HEAD~3
+```
+
+执行后会弹出一个编辑器（通常是 Vim 或 VS Code），显示类似以下内容
+
+```plaintext
+pick 6413cb2 update work log
+pick def6425 update document
+pick 616d4d5 update the gitattribute
+```
+
+**修改提交指令**
+
+将需要合并的提交前的 `pick` 改为 `squash`（或简写 `s`），表示 “将该提交合并到前一个提交”。
+例如，保留第一个提交的 `pick`，后面的改为 `squash`
+
+```plaintext
+pick 6413cb2 update work log
+s def6425 update document
+s 616d4d5 update the gitattribute
+```
+
+- `pick`：保留该提交
+- `squash`：将该提交合并到上一个提交
+
+**保存并退出编辑器**
+
+- 如果是 Vim 编辑器：按 `Esc` 后输入 `:wq` 保存退出。
+- 如果是 VS Code：直接编辑后保存关闭窗口。
+
+**编辑合并后的提交信息**
+
+保存后会自动弹出第二个编辑器，显示所有被合并提交的信息，例如：
+
+```plaintext
+# This is a combination of 3 commits.
+# The first commit's message is:
+update work log
+
+# This is the 2nd commit message:
+update document
+
+# This is the 3rd commit message:
+update the gitattribute
+```
+
+删除多余内容，编写一个合并后的清晰信息，例如：
+
+```plaintext
+refactor: update documents and git attributes
+```
+
+保存退出编辑器。
+
+**推送合并后的提交（如果已推送到远程）**
+
+由于修改了历史提交，需要强制推送（仅在个人分支或确认无他人协作时使用）：
+
+bash
+
+```bash
+git push -f origin main
+```
+
+注意事项
+
+1. **不要合并已公开的、多人协作的提交**：强制推送会覆盖远程历史，影响其他开发者。
+2. **精确选择范围**：如果想合并更早的提交，可将 `HEAD~3` 改为具体的提交哈希（如 `git rebase -i e08f24f`，合并从 `e08f24f` 之后的所有提交）。
+3. **撤销操作**：如果中途出错，可执行 `git rebase --abort` 放弃合并，回到操作前的状态。
+
+
+
+## 下次任务 0913：
 
 跑通后端，数据库链接，使用新流程方便后续迁移k8s等企业管理，同时预留接口给中间件
 

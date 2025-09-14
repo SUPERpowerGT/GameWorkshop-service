@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: GameWorkshop-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/game_workshop_db
+    username: postgres
+    password: 123
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+
+mybatis:
+  mapper-locations: classpath:mybatis/**/*.xml
+  type-aliases-package: com.gameworkshop.domain.project.model
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

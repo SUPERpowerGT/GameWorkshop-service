@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gameworkshop.infrastructure.persistence.mybatis.mapper.DevGameMapper">
+
+    <resultMap id="BaseResultMap" type="com.gameworkshop.domain.DevGame.model.DevGame">
+        <id column="id" property="id"/>
+        <result column="developer_profile_id" property="developerProfileId"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+        <result column="release_date" property="releaseDate"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.gameworkshop.domain.DevGame.model.DevGame">
+        INSERT INTO dev_game (
+        id,
+        developer_profile_id,
+        name,
+        description,
+        release_date,
+        created_at,
+        updated_at
+        ) VALUES (
+        #{id},
+        #{developerProfileId},
+        #{name},
+        #{description},
+        #{releaseDate},
+        #{createdAt},
+        #{updatedAt}
+        )
+    </insert>
+
+    <select id="selectById" parameterType="string" resultMap="BaseResultMap">
+        SELECT
+            id,
+            developer_profile_id,
+            name,
+            description,
+            release_date,
+            created_at,
+            updated_at
+        FROM dev_game
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByDeveloperProfileId" parameterType="string" resultMap="BaseResultMap">
+        SELECT
+            id,
+            developer_profile_id,
+            name,
+            description,
+            release_date,
+            created_at,
+            updated_at
+        FROM dev_game
+        WHERE developer_profile_id = #{developerProfileId}
+        ORDER BY created_at DESC
+    </select>
+
+    <update id="updateById" parameterType="com.gameworkshop.domain.DevGame.model.DevGame">
+        UPDATE dev_game SET
+        developer_profile_id = #{developerProfileId},
+        name = #{name},
+        description = #{description},
+        release_date = #{releaseDate},
+        updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="string">
+        DELETE FROM dev_game WHERE id = #{id}
+    </delete>
+
+</mapper>

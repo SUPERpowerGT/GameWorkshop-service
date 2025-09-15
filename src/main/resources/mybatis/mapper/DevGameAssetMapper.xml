@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gameworkshop.infrastructure.persistence.mybatis.mapper.DevGameAssetMapper">
+
+    <resultMap id="BaseResultMap" type="com.gameworkshop.domain.DevGameAsset.model.DevGameAsset">
+        <id column="id" property="id"/>
+        <result column="dev_game_id" property="devGameId"/>
+        <result column="asset_type" property="assetType"/>
+        <result column="file_name" property="fileName"/>
+        <result column="storage_path" property="storagePath"/>
+        <result column="file_size" property="fileSize"/>
+        <result column="mime_type" property="mimeType"/>
+        <result column="uploaded_at" property="uploadedAt"/>
+    </resultMap>
+
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.String">
+        SELECT
+            id,
+            dev_game_id,
+            asset_type,
+            file_name,
+            storage_path,
+            file_size,
+            mime_type,
+            uploaded_at
+        FROM dev_game_asset
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByDevGameId" resultMap="BaseResultMap" parameterType="java.lang.String">
+        SELECT
+            id,
+            dev_game_id,
+            asset_type,
+            file_name,
+            storage_path,
+            file_size,
+            mime_type,
+            uploaded_at
+        FROM dev_game_asset
+        WHERE dev_game_id = #{devGameId}
+        ORDER BY uploaded_at DESC
+    </select>
+
+    <select id="findByDevGameIdAndAssetType" resultMap="BaseResultMap">
+        SELECT
+            id,
+            dev_game_id,
+            asset_type,
+            file_name,
+            storage_path,
+            file_size,
+            mime_type,
+            uploaded_at
+        FROM dev_game_asset
+        WHERE dev_game_id = #{devGameId}
+          AND asset_type = #{assetType}
+        ORDER BY uploaded_at DESC
+    </select>
+
+    <insert id="insert" parameterType="com.gameworkshop.domain.DevGameAsset.model.DevGameAsset">
+        INSERT INTO dev_game_asset (
+            id,
+            dev_game_id,
+            asset_type,
+            file_name,
+            storage_path,
+            file_size,
+            mime_type,
+            uploaded_at
+        ) VALUES (
+                     #{id},
+                     #{devGameId},
+                     #{assetType},
+                     #{fileName},
+                     #{storagePath},
+                     #{fileSize},
+                     #{mimeType},
+                     #{uploadedAt}
+                 )
+    </insert>
+
+    <insert id="batchInsert">
+        INSERT INTO dev_game_asset (
+        id,
+        dev_game_id,
+        asset_type,
+        file_name,
+        storage_path,
+        file_size,
+        mime_type,
+        uploaded_at
+        ) VALUES
+        <foreach collection="assets" item="item" separator=",">
+            (
+            #{item.id},
+            #{item.devGameId},
+            #{item.assetType},
+            #{item.fileName},
+            #{item.storagePath},
+            #{item.fileSize},
+            #{item.mimeType},
+            #{item.uploadedAt}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateById" parameterType="com.gameworkshop.domain.DevGameAsset.model.DevGameAsset">
+        UPDATE dev_game_asset
+        SET
+            dev_game_id = #{devGameId},
+            asset_type = #{assetType},
+            file_name = #{fileName},
+            storage_path = #{storagePath},
+            file_size = #{fileSize},
+            mime_type = #{mimeType},
+            uploaded_at = #{uploadedAt}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.String">
+        DELETE FROM dev_game_asset
+        WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByDevGameId" parameterType="java.lang.String">
+        DELETE FROM dev_game_asset
+        WHERE dev_game_id = #{devGameId}
+    </delete>
+
+    <select id="countByDevGameId" resultType="java.lang.Long" parameterType="java.lang.String">
+        SELECT COUNT(1) FROM dev_game_asset
+        WHERE dev_game_id = #{devGameId}
+    </select>
+
+</mapper>

@@ -1,7 +1,7 @@
 package com.gameworkshop;
 
-import com.gameworkshop.domain.project.model.DeveloperProfile;
-import com.gameworkshop.domain.project.repository.DeveloperProfileMapper;
+import com.gameworkshop.domain.DeveloperProfile.model.DeveloperProfile;
+import com.gameworkshop.infrastructure.persistence.mybatis.mapper.DeveloperProfileMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,8 +23,10 @@ public class GameWorkshopServiceApplicationTests {
         //profile.setProjectCount(5);
 
         //mapper.insert(profile);
+        //this is the optional usage
+        DeveloperProfile found = mapper.findById("test_1")
+            .orElse(new DeveloperProfile());
 
-        DeveloperProfile found = mapper.findById("test_1");
         System.out.println("✅ the result is: " + found);
     }
 

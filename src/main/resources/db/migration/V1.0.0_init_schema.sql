@@ -26,21 +26,12 @@ create table dev_game(
 
 create INDEX idx_dev_game_developer ON dev_game(developer_profile_id); -- Optimizes queries for developer's games
 
--- 3. Game asset type enumeration
--- Defines valid asset categories
-create type game_asset_type as enum (
-    'INSTALLER',   -- Game installation package
-    'IMAGES',      -- Screenshots and other image assets
-    'TRAILER',     -- Promotional video content
-    'ICON'         -- Game icon/image
-);
-
--- 4. Game asset table
+-- 4. Game asset table (modified: asset_type as VARCHAR instead of ENUM)
 -- Stores game-related file assets
 create table dev_game_asset(
                                id varchar(36) primary key, -- Unique asset identifier
                                dev_game_id varchar(36) not null references dev_game(id) on delete cascade, -- Associated game
-                               asset_type game_asset_type NOT NULL, -- Type of asset from enumeration
+                               asset_type varchar(50) NOT NULL, -- Type of asset as string (replaces ENUM)
                                file_name varchar(200) not null, -- Original file name
                                storage_path varchar(500) not null, -- Storage location path
                                file_size bigint not null CHECK (file_size > 0), -- File size in bytes (positive value required)

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gameworkshop.infrastructure.persistence.mybatis.mapper.DeveloperProfileMapper">
+
+    <resultMap id="BaseResultMap" type="com.gameworkshop.domain.DeveloperProfile.model.DeveloperProfile">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="project_count" property="projectCount"/>
+    </resultMap>
+
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.String">
+        SELECT id, user_id, project_count
+        FROM developer_profile
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByUserId" resultMap="BaseResultMap" parameterType="java.lang.String">
+        SELECT id, user_id, project_count
+        FROM developer_profile
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT id, user_id, project_count
+        FROM developer_profile
+    </select>
+
+    <insert id="insert" parameterType="com.gameworkshop.domain.DeveloperProfile.model.DeveloperProfile">
+        INSERT INTO developer_profile (id, user_id, project_count)
+        VALUES (#{id}, #{userId}, #{projectCount})
+    </insert>
+
+    <insert id="batchInsert">
+        INSERT INTO developer_profile (id, user_id, project_count)
+        VALUES
+        <foreach collection="profiles" item="item" separator=",">
+            (#{item.id}, #{item.userId}, #{item.projectCount})
+        </foreach>
+    </insert>
+
+    <update id="updateById" parameterType="com.gameworkshop.domain.DeveloperProfile.model.DeveloperProfile">
+        UPDATE developer_profile
+        SET user_id = #{userId},
+            project_count = #{projectCount}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateProjectCountById">
+        UPDATE developer_profile
+        SET project_count = #{projectCount}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.String">
+        DELETE FROM developer_profile
+        WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByUserId" parameterType="java.lang.String">
+        DELETE FROM developer_profile
+        WHERE user_id = #{userId}
+    </delete>
+
+    <select id="count" resultType="java.lang.Long">
+        SELECT COUNT(1) FROM developer_profile
+    </select>
+
+</mapper>

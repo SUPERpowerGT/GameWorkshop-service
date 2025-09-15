@@ -1,4 +1,4 @@
-package com.gameworkshop.domain.project.model;
+package com.gameworkshop.domain.DeveloperProfile.model;
 
 import lombok.Data;
 

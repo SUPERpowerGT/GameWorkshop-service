@@ -16,7 +16,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
 @SpringBootTest
 @ActiveProfiles("test")
 public class DevGameMapperTest {

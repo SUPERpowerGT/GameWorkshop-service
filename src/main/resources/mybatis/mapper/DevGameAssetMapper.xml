@@ -13,20 +13,6 @@
         <result column="uploaded_at" property="uploadedAt"/>
     </resultMap>
 
-    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.String">
-        SELECT
-            id,
-            dev_game_id,
-            asset_type,
-            file_name,
-            storage_path,
-            file_size,
-            mime_type,
-            uploaded_at
-        FROM dev_game_asset
-        WHERE id = #{id}
-    </select>
-
     <select id="findByDevGameId" resultMap="BaseResultMap" parameterType="java.lang.String">
         SELECT
             id,

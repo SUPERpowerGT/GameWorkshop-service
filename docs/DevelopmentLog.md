@@ -372,3 +372,29 @@ git push -f origin main
 测试微服务架构下前端是否能更新数据上传数据
 
 接口文档自动生成
+
+
+
+## 0922
+
+### 日志
+
+开发前端和后端接口
+
+完成前后端下载文件功能
+
+### 学习摘要
+
+1.基于restful的前后端响应流程
+
+ **Controller → Application Service → Domain → Repository → Mapper → MySQL**
+
+2.xml和使用注解不能同时定义会冲突
+
+3.访问http://localhost:8080/api/assets/download/asset-001可以正常下载文件内容！成功捏
+
+4.最好在application配置@MapperScan("com.gameworkshop.infrastructure.persistence.mybatis.mapper") 这样可以读取到mabtis配置文件
+
+### 下次任务
+
+更新用户上传功能

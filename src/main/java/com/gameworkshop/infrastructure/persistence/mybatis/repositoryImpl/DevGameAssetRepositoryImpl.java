@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+//@NoArgsConstructor空构造函数 @AllArgsConstructor所有字段的构造函数 @RequiredArgsConstructor必需参数构造函数（final/@NonNull）
 @RequiredArgsConstructor
 public class DevGameAssetRepositoryImpl implements DevGameAssetRepository {
     private final DevGameAssetMapper devGameAssetMapper;

@@ -13,8 +13,8 @@ spring:
       idle-timeout: 600000
 
 mybatis:
-  mapper-locations: classpath:mybatis/**/*.xml
-  type-aliases-package: com.gameworkshop.domain.project.model
+  mapper-locations: classpath*:mybatis/mapper/**/*.xml
+  type-aliases-package: com.gameworkshop.domain
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

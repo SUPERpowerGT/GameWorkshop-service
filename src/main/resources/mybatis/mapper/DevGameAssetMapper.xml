@@ -44,28 +44,6 @@
         ORDER BY uploaded_at DESC
     </select>
 
-    <insert id="insert" parameterType="com.gameworkshop.domain.DevGameAsset.model.DevGameAsset">
-        INSERT INTO dev_game_asset (
-            id,
-            dev_game_id,
-            asset_type,
-            file_name,
-            storage_path,
-            file_size,
-            mime_type,
-            uploaded_at
-        ) VALUES (
-                     #{id},
-                     #{devGameId},
-                     #{assetType},
-                     #{fileName},
-                     #{storagePath},
-                     #{fileSize},
-                     #{mimeType},
-                     #{uploadedAt}
-                 )
-    </insert>
-
     <insert id="batchInsert">
         INSERT INTO dev_game_asset (
         id,

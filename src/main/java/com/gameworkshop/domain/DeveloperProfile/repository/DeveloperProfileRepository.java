@@ -25,4 +25,6 @@ public interface DeveloperProfileRepository {
     int deleteByUserId(String userId);
 
     long count();
+
+    public void syncProjectCount(String developerId);
 }

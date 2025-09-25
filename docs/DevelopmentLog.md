@@ -398,3 +398,46 @@ git push -f origin main
 ### 下次任务
 
 更新用户上传功能
+
+
+
+## 0925
+
+### 日志
+
+### 学习摘要
+
+上传游戏功能流程图
+
+```
+前端 (React/Android)
+   |
+   V
+[Controller] DevGameUploadController
+   |
+   V
+[Application Service] DevGameApplicationService
+   |
+   +--> 调用 [Domain Repository] DeveloperProfileRepository (查开发者)
+   |
+   +--> 调用 [Domain Repository] DevGameRepository (保存游戏)
+   |
+   +--> 调用 [Domain Repository] DevGameAssetRepository (保存资源)
+   |
+   V
+[Infrastructure]
+   ├── DeveloperProfileRepositoryImpl  -> DeveloperProfileMapper -> developer_profile 表
+   ├── DevGameRepositoryImpl           -> DevGameMapper          -> dev_game 表
+   └── DevGameAssetRepositoryImpl      -> DevGameAssetMapper     -> dev_game_asset 表
+   |
+   V
+数据库 (MySQL) + 文件系统 (D:/Project/GameWorkshop/game-assets/)
+
+```
+
+
+
+### 下次任务
+
+
+

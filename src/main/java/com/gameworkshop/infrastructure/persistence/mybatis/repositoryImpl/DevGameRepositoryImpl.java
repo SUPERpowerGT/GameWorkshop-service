@@ -42,4 +42,14 @@ public class DevGameRepositoryImpl implements DevGameRepository {
         return affectedRows > 0;
     }
 
+    @Override
+    public void insert(DevGame game) {
+        devGameMapper.insert(game);
+    }
+
+    @Override
+    public void updateById(DevGame game) {
+        devGameMapper.updateById(game);
+    }
+
 }

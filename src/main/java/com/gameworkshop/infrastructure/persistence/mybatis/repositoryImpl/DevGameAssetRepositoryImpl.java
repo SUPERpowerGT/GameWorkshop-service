@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 //@NoArgsConstructor空构造函数 @AllArgsConstructor所有字段的构造函数 @RequiredArgsConstructor必需参数构造函数（final/@NonNull）
@@ -32,17 +33,29 @@ public class DevGameAssetRepositoryImpl implements DevGameAssetRepository {
     }
 
     @Override
-    public void save(DevGameAsset asset) {
-        if (asset.getId() == null && asset.getUploadedAt() == null) {
+    public void insert(DevGameAsset asset) {
+        if (asset.getUploadedAt() == null) {
             asset.setUploadedAt(LocalDateTime.now());
         }
+        devGameAssetMapper.insert(asset);
+    }
 
-        if (asset.getId() == null) {
+    @Override
+    public void update(DevGameAsset asset) {
+        devGameAssetMapper.updateById(asset);
+    }
+
+    @Override
+    public void save(DevGameAsset asset) {
+        if (asset.getId() == null || asset.getId().isEmpty()) {
+            asset.setId(UUID.randomUUID().toString());
+            asset.setUploadedAt(LocalDateTime.now());
             devGameAssetMapper.insert(asset);
         } else {
             devGameAssetMapper.updateById(asset);
         }
     }
+
 
     @Override
     public int batchSave(List<DevGameAsset> assets) {

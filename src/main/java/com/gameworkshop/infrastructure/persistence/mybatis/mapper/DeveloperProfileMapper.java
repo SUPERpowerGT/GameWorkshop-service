@@ -3,6 +3,7 @@ package com.gameworkshop.infrastructure.persistence.mybatis.mapper;
 import com.gameworkshop.domain.DeveloperProfile.model.DeveloperProfile;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +16,13 @@ public interface DeveloperProfileMapper {
      * return: developerProfile object
      */
     Optional<DeveloperProfile> findById(String id);
+
+
+    @Update("UPDATE developer_profile " +
+            "SET project_count = #{count} " +
+            "WHERE id = #{developerId}")
+    void updateProjectCount(@Param("developerId") String developerId,
+                           @Param("count") int count);
 
     /**
      * find developerProfile by userid

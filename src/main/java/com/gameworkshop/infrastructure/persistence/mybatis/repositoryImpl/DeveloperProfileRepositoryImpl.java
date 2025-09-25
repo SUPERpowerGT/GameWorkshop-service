@@ -2,6 +2,7 @@ package com.gameworkshop.infrastructure.persistence.mybatis.repositoryImpl;
 
 import com.gameworkshop.domain.DeveloperProfile.model.DeveloperProfile;
 import com.gameworkshop.domain.DeveloperProfile.repository.DeveloperProfileRepository;
+import com.gameworkshop.infrastructure.persistence.mybatis.mapper.DevGameMapper;
 import com.gameworkshop.infrastructure.persistence.mybatis.mapper.DeveloperProfileMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -13,7 +14,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class DeveloperProfileRepositoryImpl implements DeveloperProfileRepository {
     private final DeveloperProfileMapper developerProfileMapper;
-
+    private final DevGameMapper devGameMapper;
     @Override
     public Optional<DeveloperProfile> findById(String id) {
         return developerProfileMapper.findById(id);
@@ -22,6 +23,12 @@ public class DeveloperProfileRepositoryImpl implements DeveloperProfileRepositor
     @Override
     public Optional<DeveloperProfile> findByUserId(String userId) {
         return developerProfileMapper.findByUserId(userId);
+    }
+
+    @Override
+    public void syncProjectCount(String developerId) {
+        int count = devGameMapper.countByDeveloperId(developerId);
+        developerProfileMapper.updateProjectCount(developerId, count);
     }
 
     @Override

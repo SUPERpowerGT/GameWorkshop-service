@@ -14,6 +14,10 @@ public interface DevGameAssetRepository {
 
     List<DevGameAsset> findByGameIdAndType(String devGameId, String assetType);
 
+    void insert(DevGameAsset asset);
+
+    void update(DevGameAsset asset);
+
     void save(DevGameAsset asset);
 
     int batchSave(List<DevGameAsset> assets);

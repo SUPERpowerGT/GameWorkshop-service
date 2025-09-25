@@ -1,9 +1,7 @@
 package com.gameworkshop.infrastructure.persistence.mybatis.mapper;
 
 import com.gameworkshop.domain.DevGameAsset.model.DevGameAsset;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +20,9 @@ public interface DevGameAssetMapper {
             @Param("devGameId") String devGameId,
             @Param("assetType") String assetType);
 
-
+    @Insert("INSERT INTO dev_game_asset " +
+            "(id, dev_game_id, asset_type, file_name, storage_path, file_size, mime_type, uploaded_at) " +
+            "VALUES (#{id}, #{devGameId}, #{assetType}, #{fileName}, #{storagePath}, #{fileSize}, #{mimeType}, #{uploadedAt})")
     int insert(DevGameAsset devGameAsset);
 
     int batchInsert(@Param("assets") List<DevGameAsset> assets);

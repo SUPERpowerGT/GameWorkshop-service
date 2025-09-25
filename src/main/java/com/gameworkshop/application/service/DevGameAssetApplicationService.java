@@ -11,8 +11,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class DevGameAssetApplicationService {
     private final DevGameAssetRepository devGameAssetRepository;
-
-    public Optional<DevGameAsset> getAssetById(String id) {
+    public Optional<DevGameAsset> loadGameAssetForDownload(String id) {
         return devGameAssetRepository.findById(id);
     }
 }

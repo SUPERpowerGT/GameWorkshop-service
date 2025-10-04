@@ -435,7 +435,9 @@ git push -f origin main
 
 ```
 
+上传接口测试：
 
+![image-20250926212245440](C:\Users\12912\AppData\Roaming\Typora\typora-user-images\image-20250926212245440.png)
 
 ### 下次任务
 

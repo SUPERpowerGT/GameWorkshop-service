@@ -6,7 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 
 @Data
-public class GameUploadRequest {
+public class DevGameUploadRequest {
     private String developerId;
     private String name;
     private String description;

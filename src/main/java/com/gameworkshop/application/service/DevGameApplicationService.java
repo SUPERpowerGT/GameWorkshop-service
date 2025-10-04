@@ -6,8 +6,8 @@ import com.gameworkshop.domain.DevGameAsset.model.DevGameAsset;
 import com.gameworkshop.domain.DevGameAsset.repository.DevGameAssetRepository;
 import com.gameworkshop.domain.DeveloperProfile.model.DeveloperProfile;
 import com.gameworkshop.domain.DeveloperProfile.repository.DeveloperProfileRepository;
-import com.gameworkshop.interfaces.dto.GameUploadRequest;
-import com.gameworkshop.interfaces.dto.GameResponse;
+import com.gameworkshop.interfaces.dto.DevGameUploadRequest;
+import com.gameworkshop.interfaces.dto.DevGameResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,7 +27,7 @@ public class DevGameApplicationService {
     private final DevGameAssetRepository devGameAssetRepository;
     private final DeveloperProfileRepository developerProfileRepository;
 
-    public GameResponse uploadGame(GameUploadRequest request) {
+    public DevGameResponse uploadGame(DevGameUploadRequest request) {
         DeveloperProfile developer = developerProfileRepository.findById(request.getDeveloperId())
                 .orElseThrow(() -> new IllegalArgumentException("Developer profile not found"));
 
@@ -51,7 +51,7 @@ public class DevGameApplicationService {
 
         developerProfileRepository.syncProjectCount(request.getDeveloperId());
 
-        return new GameResponse(gameId, request.getName(), request.getDescription(),
+        return new DevGameResponse(gameId, request.getName(), request.getDescription(),
                 imageUrl, videoUrl, zipUrl);
     }
 

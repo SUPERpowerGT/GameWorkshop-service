@@ -1,8 +1,8 @@
 package com.gameworkshop.interfaces.rest;
 
 import com.gameworkshop.application.service.DevGameApplicationService;
-import com.gameworkshop.interfaces.dto.GameUploadRequest;
-import com.gameworkshop.interfaces.dto.GameResponse;
+import com.gameworkshop.interfaces.dto.DevGameUploadRequest;
+import com.gameworkshop.interfaces.dto.DevGameResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -12,14 +12,15 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 
 @RestController
-@RequestMapping("/api/games")
+@RequestMapping("/api/developer/devgame")
 @RequiredArgsConstructor
+
 public class DevGameUploadController {
 
     private final DevGameApplicationService devGameApplicationService;
 
     @PostMapping("/upload")
-    public ResponseEntity<GameResponse> uploadGame(
+    public ResponseEntity<DevGameResponse> uploadGame(
             @RequestParam("developerId")String developerId,
             @RequestParam("name") String name,
             @RequestParam("description") String description,
@@ -27,7 +28,7 @@ public class DevGameUploadController {
             @RequestPart("image") MultipartFile imageFile,
             @RequestPart("video") MultipartFile videoFile,
             @RequestPart("zip") MultipartFile zipFile) {
-        GameUploadRequest request = new GameUploadRequest();
+        DevGameUploadRequest request = new DevGameUploadRequest();
         request.setDeveloperId(developerId);
         request.setName(name);
         request.setDescription(description);
@@ -36,7 +37,7 @@ public class DevGameUploadController {
         request.setVideo(videoFile);
         request.setZip(zipFile);
 
-        GameResponse response = devGameApplicationService.uploadGame(request);
+        DevGameResponse response = devGameApplicationService.uploadGame(request);
         return ResponseEntity.ok(response);
     }
 }

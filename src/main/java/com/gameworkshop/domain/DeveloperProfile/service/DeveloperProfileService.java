@@ -6,11 +6,4 @@ import java.util.List;
 
 public interface DeveloperProfileService
 {
-    DeveloperProfile getById(String id);
-
-    void save(DeveloperProfile developerProfile);
-
-    DeveloperProfile getByUserId(String userId);
-
-    int batchSave(List<DeveloperProfile> profiles);
 }

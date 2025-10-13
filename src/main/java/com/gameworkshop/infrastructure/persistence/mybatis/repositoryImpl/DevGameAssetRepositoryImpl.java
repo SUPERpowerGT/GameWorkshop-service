@@ -33,6 +33,11 @@ public class DevGameAssetRepositoryImpl implements DevGameAssetRepository {
     }
 
     @Override
+    public Optional<DevGameAsset> findFirstByGameIdAndType(String devGameId, String assetType) {
+        return devGameAssetMapper.findFirstByDevGameIdAndAssetType(devGameId, assetType);
+    }
+
+    @Override
     public void insert(DevGameAsset asset) {
         if (asset.getUploadedAt() == null) {
             asset.setUploadedAt(LocalDateTime.now());

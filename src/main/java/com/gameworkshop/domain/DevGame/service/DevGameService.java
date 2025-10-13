@@ -7,11 +7,4 @@ import java.util.Optional;
 
 public interface DevGameService {
 
-    void createOrUpdate(DevGame devGame);
-
-    Optional<DevGame> getGameById(String id);
-
-    List<DevGame> getGamesByDeveloper(String developerProfileId);
-
-    boolean removeGameById(String id);
 }

@@ -14,6 +14,8 @@ public interface DevGameAssetRepository {
 
     List<DevGameAsset> findByGameIdAndType(String devGameId, String assetType);
 
+    Optional<DevGameAsset> findFirstByGameIdAndType(String devGameId, String assetType);
+
     void insert(DevGameAsset asset);
 
     void update(DevGameAsset asset);

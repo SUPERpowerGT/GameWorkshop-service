@@ -44,6 +44,16 @@
         ORDER BY uploaded_at DESC
     </select>
 
+    <select id="findFirstByDevGameIdAndAssetType" resultType="com.gameworkshop.domain.DevGameAsset.model.DevGameAsset">
+        SELECT *
+        FROM dev_game_asset
+        WHERE dev_game_id = #{devGameId}
+          AND asset_type = #{assetType}
+        ORDER BY uploaded_at DESC
+        LIMIT 1
+    </select>
+
+
     <insert id="batchInsert">
         INSERT INTO dev_game_asset (
         id,

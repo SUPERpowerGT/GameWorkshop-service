@@ -25,6 +25,9 @@ public interface DevGameAssetMapper {
             "VALUES (#{id}, #{devGameId}, #{assetType}, #{fileName}, #{storagePath}, #{fileSize}, #{mimeType}, #{uploadedAt})")
     int insert(DevGameAsset devGameAsset);
 
+    Optional<DevGameAsset> findFirstByDevGameIdAndAssetType(String devGameId, String assetType);
+
+
     int batchInsert(@Param("assets") List<DevGameAsset> assets);
 
     int updateById(DevGameAsset devGameAsset);

@@ -443,3 +443,652 @@ git push -f origin main
 
 
 
+## 1006
+
+| 🧱 阶段 1（当前） | 两个 Spring Boot + 前端写死 URL | 简单易调试，开发方便 |
+| ---------------- | ------------------------------- | -------------------- |
+|                  |                                 |                      |
+
+| 🚪 阶段 2 | ✅ 加一个 **API Gateway（Spring Cloud Gateway 或 Nginx）** | 统一路由入口 |
+| -------- | --------------------------------------------------------- | ------------ |
+|          |                                                           |              |
+
+| 🧭 阶段 3 | ✅ 加上 **Eureka / Nacos 服务注册中心** | 动态发现服务，不再写死端口 |
+| -------- | -------------------------------------- | -------------------------- |
+|          |                                        |                            |
+
+| 🔐 阶段 4 | ✅ 加上 **Spring Cloud Config + JWT Auth Service** | 统一配置 & 认证授权 |
+| -------- | ------------------------------------------------- | ------------------- |
+|          |                                                   |                     |
+
+| ☁️ 阶段 5 | ✅ Docker Compose 或 Kubernetes | 容器化部署，服务独立伸缩 |
+| -------- | ------------------------------ | ------------------------ |
+|          |                                |                          |
+
+
+
+## 1009
+
+### 计划
+
+完善前端界面设计 完成
+
+完成部分前端功能开发 完成
+
+### 日志
+
+使用Figma设计前端界面
+
+https://www.figma.com/design/sSbGlIYwOBLfjIQ0sC9y75/devloper?node-id=1-1045
+
+更新前端静态界面
+
+
+
+## 1010
+
+### 计划
+
+合并后端
+
+验证前后端功能
+
+
+
+## 1011
+
+### 计划
+
+实现微服务架构设计
+
+开发异步功能（kafuka）完成
+
+实现切片功能（上传下载）
+
+
+
+## 1012
+
+### 计划
+
+计划下一步（接口设计）可拓展性 
+
+### 学习摘要
+
+JWT 的实现逻辑
+
+| 步骤         | 参与者                   | 操作                                         | 使用的密钥 |
+| ------------ | ------------------------ | -------------------------------------------- | ---------- |
+| ① 用户登录   | 前端 → Auth 服务         | 提交账号密码                                 | —          |
+| ② 签发 JWT   | Auth 服务                | ✅ 用 **私钥** 签名生成 JWT                   | 🔐 私钥     |
+| ③ 保存 Token | 前端                     | 把 JWT 存入 localStorage / cookie            | —          |
+| ④ 发请求     | 前端 → Developer-Service | 在 Header 加上 `Authorization: Bearer <JWT>` | —          |
+| ⑤ 验证 JWT   | Developer-Service        | ✅ 用 **公钥** 验证签名真伪                   | 🔓 公钥     |
+| ⑥ 通过验证   | Developer-Service        | 提取 `sub`（userId）、`role` 信息            | —          |
+
+1. 如何第一次创建公钥和私钥？
+
+使用 openssl 一次性生成即可：
+
+```
+openssl genrsa -out rsa-private.pem 2048
+openssl rsa -in rsa-private.pem -pubout -out rsa-public.pem
+```
+
+私钥放在 Auth 服务（认证服务）内部，公钥可以复制到其他服务。
+
+
+
+2. 登录时为什么没有 JWT？
+
+第一次登录确实没有 JWT。
+ 因为用户还没认证，`/auth/login` 接口不需要验证。
+ 只有登录成功后，服务端才会生成 JWT。
+
+
+
+3. 后端登录成功后如何返回 JWT？
+
+认证服务验证账号密码正确后，用私钥签发 JWT 并返回给前端：
+
+```
+@PostMapping("/login")
+public Map<String, String> login(@RequestBody LoginRequest req) {
+    String token = jwtProvider.generateToken(req.getUsername());
+    return Map.of("token", token);
+}
+
+```
+
+
+
+4. 前端如何存储 JWT？
+
+登录成功后，前端将 JWT 保存到浏览器的 localStorage：
+
+```
+localStorage.setItem("auth_token", token);
+```
+
+之后每次请求自动从 localStorage 取出：
+
+```
+fetch("/api/devgames", {
+  headers: { Authorization: `Bearer ${localStorage.getItem("auth_token")}` },
+});
+```
+
+
+
+5. JWT 是如何自动附加在请求里的？
+
+在 `apiClient` 封装中添加了逻辑：
+ 如果存在 token，则自动在请求头中加上 `Authorization: Bearer <token>`。
+
+```
+headers: {
+  ...(token && { Authorization: `Bearer ${token}` }),
+}
+```
+
+
+
+6. 其他微服务如何验证 JWT？
+
+其他服务（如 Developer-Service）只需要公钥验证真伪：
+
+```
+Claims claims = Jwts.parserBuilder()
+    .setSigningKey(publicKey)
+    .build()
+    .parseClaimsJws(token)
+    .getBody();
+```
+
+验证通过后就能获取 `userId`、`role`。
+
+
+
+7. 公钥如何分发给其他服务？
+
+有两种方式：
+
+**方式一（简单）**：手动拷贝公钥文件到每个服务的 `resources/keys/`。
+
+**方式二（动态）**：认证服务提供 `/auth/public-key` 接口，其他服务启动时拉取。
+
+
+
+8. 为什么要用公钥 + 私钥，而不是同一个密钥？
+
+因为公私钥是非对称加密：
+ 只有认证服务能“签发”，其他服务只能“验证”。
+ 就算其他服务泄露，也无法伪造 JWT。
+
+
+
+9. JWT 在系统中的整体流程
+
+```
+1️⃣ 用户登录 → Auth 服务验证账号
+2️⃣ Auth 服务用私钥生成 JWT → 返回前端
+3️⃣ 前端保存 JWT 到 localStorage
+4️⃣ 前端调用任意接口时带上 Authorization: Bearer <token>
+5️⃣ 各微服务用公钥验证 JWT 签名真伪
+6️⃣ 验证成功 → 提取 userId / role → 执行业务逻辑
+```
+
+
+
+#### 重构upload方法
+
+| 模块              | 功能                                                         | 当前状态                                                     |
+| ----------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Auth-Service      | 负责登录注册、签发 JWT（用私钥签名）                         | ✅ 已有逻辑                                                   |
+| Developer-Service | 负责开发者上传游戏、管理游戏                                 | ✅ 现在增加了 JWT 验证                                        |
+| JWT 验证逻辑      | 使用公钥校验签名，确保请求来自合法用户                       | ✅ 新增 `KeyConfig`, `JwtTokenProvider`, `JwtAuthFilter`, `SecurityConfig` |
+| 数据库层          | 通过 `developerProfileRepository.findByUserId()` 获取开发者信息 | ✅ 已验证逻辑                                                 |
+| Controller 层     | 不再接收 `developerId` 参数，而是根据 JWT 自动解析           | ✅ 逻辑安全、简洁                                             |
+| 前端部分          | 登录时拿到 token 存在 `localStorage`，并自动附加到请求头     | ✅ 已集成 `AuthProvider` + `apiClient`                        |
+| 安全边界          | 只有携带合法 JWT 的请求才能访问 `/api/developer/**`          | ✅ Spring Security 已控制                                     |
+
+
+
+你这几天其实已经完成了一整套非常完整的 **JWT 鉴权体系 + DevGame 上传流程重构**。
+ 我帮你从「整体架构 → 后端逻辑 → 前端配合 → 安全机制」四个维度给你总结清晰，方便你写入报告或项目文档。
+
+🧱 一、总体架构成果（GameWorkshop-service 模块）
+
+你现在的 **Developer 微服务** 已经完成了一个完整的认证 + 授权闭环：
+
+```
+┌──────────────────────────────┐
+│        Next.js 前端（3000）       │
+│  ↳ 登录后存储 JWT(Token)         │
+│  ↳ 上传游戏 / 查看游戏            │
+│  ↳ 请求头加 Authorization: Bearer │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│  Spring Boot 后端（8081）      │
+│  - JwtAuthFilter 校验 Token   │
+│  - 提取 userId 注入上下文      │
+│  - DevGameUploadController   │
+│  - 自动为 user 创建 DeveloperProfile │
+└──────────────────────────────┘
+               │
+               ▼
+         PostgreSQL + Redis
+```
+
+🔐 二、JWT 验证体系（Security 模块）
+
+你新增并整合了一整套标准的 JWT 安全体系 👇：
+
+| 类名                   | 作用                       | 说明                                               |
+| ---------------------- | -------------------------- | -------------------------------------------------- |
+| **`KeyConfig`**        | 加载 `rsa-public.pem` 公钥 | 负责解析公钥字符串生成 `PublicKey`                 |
+| **`JwtTokenProvider`** | 校验和解析 JWT             | 验证签名、提取 userId（从 `sub` 字段）             |
+| **`JwtAuthFilter`**    | Spring Security 过滤器     | 拦截所有请求 → 校验 token → 注入 `SecurityContext` |
+| **`SecurityConfig`**   | 安全策略配置               | 关闭 CSRF、启用无状态会话、注册过滤器链            |
+
+💡 效果：
+
+- 所有 `/api/**` 请求都会被 `JwtAuthFilter` 检查；
+- 通过后，`SecurityContextHolder` 中自动保存当前 `userId`；
+- Controller 可直接用 `@AuthenticationPrincipal String userId` 拿到用户身份。
+
+🧩 三、DevGame 上传控制器重构成果
+
+你彻底重构了 `DevGameUploadController`：
+ 从「手动传 developerId」→ 「自动从 JWT 获取 userId」。
+
+新版本关键逻辑：
+
+```
+@PostMapping("/upload")
+public ResponseEntity<DevGameResponse> uploadGame(
+        @AuthenticationPrincipal String userId,
+        ...
+) {
+    // ✅ 如果该用户还没有 DeveloperProfile，则自动创建
+    String developerId = developerProfileRepository.findByUserId(userId)
+            .map(DeveloperProfile::getId)
+            .orElseGet(() -> {
+                DeveloperProfile profile = new DeveloperProfile(UUID.randomUUID().toString(), userId, 0);
+                developerProfileRepository.save(profile);
+                return profile.getId();
+            });
+
+    // ✅ 继续正常上传流程
+    ...
+}
+```
+
+💡 优化点：
+
+- 再也不用前端传 `developerId`
+- 用户首次上传游戏时会**自动注册开发者档案**
+- 完全避免「跨服务依赖 user-service」的问题
+
+🧠 四、数据库交互与日志验证
+
+你通过 MyBatis-Plus 成功执行了以下 SQL 交互：
+
+✅ 上传游戏插入日志：
+
+```
+INSERT INTO dev_game (id, developer_profile_id, name, description, ...)
+INSERT INTO dev_game_asset (...)
+UPDATE developer_profile SET project_count = ?
+```
+
+✅ 调用链完整：
+
+```
+Controller → ApplicationService → Repository → MyBatis Mapper → PostgreSQL
+```
+
+✅ 日志中能看到：
+
+```
+successfully loaded public key
+Token validated successfully
+INSERT INTO dev_game_asset ...
+```
+
+💪 意味着整个数据库事务流、认证流都在正常工作。
+
+💻 五、前端整合与调用
+
+前端部分也已经实现完美联动：
+
+| 文件                 | 功能          | 关键实现                                           |
+| -------------------- | ------------- | -------------------------------------------------- |
+| **`useDevGames.ts`** | 上传逻辑 Hook | 调用 `devgamesApi.upload()` 进行游戏上传           |
+| **`devgamesApi.ts`** | 封装 API 调用 | 发送 FormData（包含 image / video / zip）          |
+| **`client.ts`**      | 通用请求封装  | 自动在 header 加上 `Authorization: Bearer <token>` |
+
+👉 登录成功后，前端会在 localStorage 存 `auth_token`
+ 👉 后续上传请求自动带 JWT
+ 👉 后端识别 `userId` 并授权操作
+
+🧩 六、跨域 & 调试问题解决
+
+你正确配置了 CORS 支持：
+
+```
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOrigins("http://localhost:3000")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(true);
+    }
+}
+```
+
+✅ 允许前端跨域调用
+ ✅ 允许携带 JWT Header
+ ✅ 配合 SecurityFilterChain 完美兼容
+
+🔒 七、安全机制总结
+
+| 环节         | 内容                                                 |
+| ------------ | ---------------------------------------------------- |
+| **认证**     | 用户登录时由 `auth-service` 签发 JWT（RSA 私钥签名） |
+| **授权**     | Developer-service 使用 `JwtAuthFilter` 验证公钥      |
+| **会话**     | 无状态（Stateless）机制，无需 Session                |
+| **失败处理** | Token 无效/过期 → 返回 401，由前端处理               |
+| **未来优化** | 可添加 Refresh Token 自动刷新机制                    |
+
+🚀 八、目前系统状态总结
+
+| 模块                        | 状态       | 说明                     |
+| --------------------------- | ---------- | ------------------------ |
+| 🧩 JWT 校验链                | ✅ 完成     | RSA 公钥验证通过         |
+| 🔐 Security 过滤器           | ✅ 完成     | 每次请求自动鉴权         |
+| 💾 DevGame 上传              | ✅ 完成     | 正常写入数据库和文件系统 |
+| 👤 DeveloperProfile 自动创建 | ✅ 完成     | 自动建档                 |
+| 🌐 CORS & 请求链             | ✅ 完成     | 前后端可直连             |
+| ⏱ Token 过期刷新            | 🚧 可选优化 | 可后期加入 Refresh Token |
+
+📘 九、可写入报告/展示的总结语句
+
+> 本阶段实现了基于 **JWT + RSA 公钥** 的用户认证机制，并完成了与游戏上传功能的深度整合。
+>  系统支持用户在前端登录后，通过携带 JWT 自动完成身份识别与开发者档案的动态创建。
+>  整个流程无状态、可扩展，为后续微服务拆分与统一网关鉴权打下了基础。
+
+
+
+
+
+## 1014
+
+### 计划
+
+完成所有前后端代码，实现所有功能
+
+- my game 展示功能
+- my game game 删除功能
+- game hub 展示功能
+- game hub 详情界面下载功能
+- game hub 热门下载展示功能
+- game profile 删掉
+- dashboard 查看游戏下载次数功能
+
+### 学习摘要
+
+#### my game展示功能
+
+##### 后端开发
+
+```
++---------------------------+           +-------------------------------+
+| 🎮 前端（Next.js）        |           | 🧱 后端（Spring Boot）         |
++---------------------------+           +-------------------------------+
+          │                                            │
+          │ ① 用户点击 "My Games"                     │
+          │──────────────────────────────────────────▶│
+          │                                            │
+          │ ② 发送请求 (带JWT)                        │
+          │   GET /api/developer/devgame/my           │
+          │   Authorization: Bearer <token>           │
+          │──────────────────────────────────────────▶│
+          │                                            │
+          │                                            ▼
+          │                          [JwtAuthFilter] 验证JWT → 获取 userId
+          │                                            │
+          │                                            ▼
+          │                  [DeveloperProfileRepository.findByUserId()]
+          │                                            │
+          │                                            ▼
+          │              [DevGameRepository.findByDeveloperProfileId()]
+          │                                            │
+          │                                            ▼
+          │             [DevGameAssetRepository.findFirstByGameIdAndType("image")]
+          │                                            │
+          │                                            ▼
+          │            拼接 imageUrl = /api/assets/download/{assetId}
+          │                                            │
+          │                                            ▼
+          │        ③ 返回 JSON 列表 (List<DevGameSummaryResponse>)
+          │──────────────────────────────────────────◀│
+          │
+          │ ④ 前端渲染：
+          │    - 游戏封面 imageUrl
+          │    - 游戏名 name
+          │    - 描述 description
+          │    - 上传时间 createdAt
+          │
+          │ 用户看到「我的游戏列表」                    │
+          │                                            │
+          │                                            ▼
+          │    ⑤ 当浏览器加载封面图时：                │
+          │      访问 /api/assets/download/{assetId}   │
+          │──────────────────────────────────────────▶│
+          │                                            │
+          │                      [DevGameAssetDownloadController]
+          │                       从数据库查 asset → 从磁盘读取文件
+          │                                            │
+          │                                            ▼
+          │               返回文件流 (Content-Type: image/jpeg)
+          │──────────────────────────────────────────◀│
+          │                                            │
+          │ ⑥ 浏览器显示封面图                        │
+          ▼                                            ▼
+     🎨 My Games 页面加载完成 ✅                 🗃️ 数据一致
+
+```
+
+这里注意，需要在security配置下载图片权限，因为一般静态资源是不会发送jwt的
+
+
+
+分离式加载会更快更方便拓展 对比一次性返回json文件
+
+| 对比维度                     | **单次返回（Base64嵌入）**                       | **分离式加载（当前GameVault实现）**                     |
+| ---------------------------- | ------------------------------------------------ | ------------------------------------------------------- |
+| **请求数量**                 | 1 次（一次性返回所有数据 + 图片）                | 多次（JSON一次 + 多个图片独立请求）                     |
+| **数据体积**                 | 非常大（JSON 内嵌 Base64 图片，通常放大 30–40%） | 小得多（JSON 轻量，图片独立传输）                       |
+| **加载方式**                 | 顺序加载（必须等所有数据到齐才能渲染）           | 并发加载（JSON 与图片可同时加载）                       |
+| **首屏渲染速度**             | 慢（阻塞渲染）                                   | 快（JSON 到即可渲染框架，图片渐进加载）                 |
+| **浏览器缓存**               | ❌ 无法缓存单张图片（每次都重新下载）             | ✅ 每张图片独立缓存，可命中 CDN 或浏览器缓存             |
+| **带宽利用率**               | 差（浪费重复传输）                               | 高（仅传变化部分）                                      |
+| **可扩展性**                 | 差（难以迁移至 CDN 或对象存储）                  | 优（图片可托管至 OSS / S3 / CDN）                       |
+| **前后端解耦**               | 弱（前端需解码图片数据）                         | 强（图片走标准 HTTP 流，后端职责单一）                  |
+| **错误恢复能力**             | 差（图片损坏需重传整个 JSON）                    | 好（单张图加载失败不会影响整体页面）                    |
+| **SEO 与可访问性**           | 弱（图片不可索引）                               | 强（图片 URL 可独立被索引）                             |
+| **总体性能评分（企业推荐）** | ❌ 仅适合小型内嵌内容                             | ✅ 企业级架构通用模式（Bilibili / Steam / YouTube 同款） |
+
+功能验证
+
+使用 Postman 进行 JWT 鉴权与接口测试
+
+一、实验目标
+
+通过 Postman 验证 **GameVault 平台后端（Auth-Service + Developer-Service）** 的 JWT 登录与鉴权机制，确保：
+
+- 用户可在 Auth-Service 登录并获取合法 Token。
+- Developer-Service 能正确识别并校验 JWT。
+- 未携带或无效 Token 的请求被拒绝访问。
+
+二、测试工具与环境
+
+| 项目                   | 配置                                   |
+| ---------------------- | -------------------------------------- |
+| 工具                   | Postman 10.x                           |
+| Auth-Service 端口      | `8080`                                 |
+| Developer-Service 端口 | `8081`                                 |
+| 用户示例               | `username: 123456`, `password: 123456` |
+| Token 类型             | JWT（RS256 非对称加密）                |
+
+三、测试步骤
+
+1️⃣ 登录并获取 JWT
+
+**请求：**
+
+```
+POST http://localhost:8080/api/auth/login
+```
+
+**请求体：**
+ 在 Postman 中选择 **Body → raw → JSON**，填写：
+
+```
+{
+  "username": "123456",
+  "password": "123456"
+}
+```
+
+**请求头：**
+
+```
+Content-Type: application/json
+```
+
+**成功响应示例：**
+
+```
+{
+  "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "userId": 2,
+  "username": "123456",
+  "email": "123456@qq.com",
+  "message": "Login successful"
+}
+```
+
+> ✅ 表示 Auth-Service 登录逻辑和 JWT 签发成功。
+>  生成的 Token 会用于后续请求。
+
+2️⃣ 使用 Token 访问受保护接口
+
+**请求：**
+
+```
+GET http://localhost:8081/api/developer/devgame/my
+```
+
+**在 Postman 中配置 Authorization：**
+
+1. 切换到 **Authorization** 标签页
+2. Type 选择 **Bearer Token**
+3. 在 **Token** 一栏中粘贴登录接口返回的完整 JWT
+
+示例：
+
+```
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**成功响应：**
+
+```
+[
+  {
+    "id": "a6421fa5-5eb1-4e4b-bc70-92b975bec656",
+    "name": "game1012test",
+    "description": "test",
+    "releaseDate": "2025-10-21T16:00:00",
+    "createdAt": "2025-10-12T09:38:20.384772",
+    "imageUrl": "http://localhost:8081/api/assets/download/95feba1c-0a52-42f9-be20-74fffa8b4213"
+  },
+  {
+    "id": "0de81851-c54b-4448-b6ad-18bfd02a9d8c",
+    "name": "game1012",
+    "description": "test",
+    "releaseDate": "2025-10-27T16:00:00",
+    "createdAt": "2025-10-12T08:23:48.359629",
+    "imageUrl": "http://localhost:8081/api/assets/download/4032b2d0-c6bc-4c6f-93f1-ef50073a312e"
+  }
+]
+```
+
+> ✅ 表示 Developer-Service 成功从 JWT 中解析出 `userId`，
+>  并正确返回当前开发者的游戏数据。
+
+3️⃣ 异常验证
+
+| 场景         | 操作                  | 预期结果                |
+| ------------ | --------------------- | ----------------------- |
+| ❌ 无 Token   | 删除 Authorization 头 | 返回 `401 Unauthorized` |
+| ❌ Token 错误 | 修改 Token 任意字符   | 返回 `403 Forbidden`    |
+| ✅ 正常 Token | 保持完整 Token        | 返回 `200 OK` 与数据    |
+
+四、调用流程示意图
+
+```
+sequenceDiagram
+    participant User as 前端 / Postman
+    participant AuthService as Auth-Service (8080)
+    participant DevService as Developer-Service (8081)
+    participant DB as Database
+
+    User->>AuthService: POST /api/auth/login (username, password)
+    AuthService-->>User: 返回 JWT Token
+    User->>DevService: GET /api/developer/devgame/my<br>Authorization: Bearer {token}
+    DevService->>DevService: ✅ 公钥验证签名
+    DevService->>DB: 根据 userId 查询 DeveloperProfile
+    DevService-->>User: 返回游戏列表与封面链接
+```
+
+五、测试结果总结
+
+| 测试项       | 结果   | 说明                                  |
+| ------------ | ------ | ------------------------------------- |
+| 登录认证     | ✅ 通过 | 用户凭证正确返回 JWT                  |
+| JWT 签发     | ✅ 通过 | 使用私钥签名成功                      |
+| Token 校验   | ✅ 通过 | Developer-Service 使用公钥验证        |
+| 访问保护资源 | ✅ 通过 | 能正确返回开发者的游戏数据            |
+| 未授权访问   | ✅ 拒绝 | 返回 401/403                          |
+| 安全边界     | ✅ 有效 | 仅合法 JWT 可访问 `/api/developer/**` |
+
+六、结论与心得
+
+通过 Postman 实验验证，系统的 **JWT 单点登录 + 微服务鉴权机制** 工作正常：
+
+- 登录接口能正确签发带用户标识的 Token；
+- Developer-Service 能通过公钥验证 Token，有效区分合法用户；
+- Spring Security 配置实现了对 `/api/developer/**` 的访问控制；
+- Postman 可作为快速验证登录与授权逻辑的开发辅助工具。
+
+> ✅ **结论：**
+>  GameVault 的分布式认证与授权体系已闭环完成。
+>  用户登录一次即可安全访问开发者模块的受保护资源。
+
+![image-20251014043815058](C:\Users\12912\AppData\Roaming\Typora\typora-user-images\image-20251014043815058.png)
+
+![image-20251014043838629](C:\Users\12912\AppData\Roaming\Typora\typora-user-images\image-20251014043838629.png)
+
+##### 前端开发
+
+
+
+##### 测试

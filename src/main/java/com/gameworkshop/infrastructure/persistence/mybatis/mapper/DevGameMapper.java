@@ -31,7 +31,7 @@ public interface DevGameMapper {
     @Select("SELECT COUNT(*) FROM dev_game WHERE id = #{id}")
     Integer countById(@Param("id") String id);
 
-    int updateById(DevGame devGame);
+    int update(DevGame devGame);
 
     int deleteById(String id);
 

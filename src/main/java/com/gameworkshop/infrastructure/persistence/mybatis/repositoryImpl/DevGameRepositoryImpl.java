@@ -16,17 +16,6 @@ public class DevGameRepositoryImpl implements DevGameRepository {
     private final DevGameMapper devGameMapper;
 
     @Override
-    public void save(DevGame devGame) {
-        if (devGame.getId() == null || devGame.getId().isEmpty()) {
-            devGame.setCreatedAt(LocalDateTime.now());
-            devGameMapper.insert(devGame);
-        } else {
-            devGame.setUpdatedAt(LocalDateTime.now());
-            devGameMapper.updateById(devGame);
-        }
-    }
-
-    @Override
     public Optional<DevGame> findById(String id) {
         return Optional.ofNullable(devGameMapper.selectById(id));
     }
@@ -48,8 +37,8 @@ public class DevGameRepositoryImpl implements DevGameRepository {
     }
 
     @Override
-    public void updateById(DevGame game) {
-        devGameMapper.updateById(game);
+    public void update(DevGame game) {
+        devGameMapper.update(game);
     }
 
     @Override

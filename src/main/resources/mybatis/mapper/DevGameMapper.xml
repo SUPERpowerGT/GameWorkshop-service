@@ -59,15 +59,17 @@
         ORDER BY created_at DESC
     </select>
 
-    <update id="updateById" parameterType="com.gameworkshop.domain.DevGame.model.DevGame">
-        UPDATE dev_game SET
-        developer_profile_id = #{developerProfileId},
-        name = #{name},
-        description = #{description},
-        release_date = #{releaseDate},
-        updated_at = #{updatedAt}
+    <update id="update" parameterType="com.gameworkshop.domain.DevGame.model.DevGame">
+        UPDATE dev_game
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="releaseDate != null">release_date = #{releaseDate},</if>
+            updated_at = CURRENT_TIMESTAMP
+        </set>
         WHERE id = #{id}
     </update>
+
 
     <delete id="deleteById" parameterType="string">
         DELETE FROM dev_game WHERE id = #{id}

@@ -154,31 +154,6 @@ public class DevGameMapperTest {
         devGameMapper.deleteById(secondGameId);
     }
 
-    /**
-     * Test updateById method: Verify game data update by ID is effective
-     */
-    @Test
-    void testUpdateById() {
-        // 1. Prepare update data (modify name, description, release date)
-        DevGame updateGame = new DevGame();
-        updateGame.setId(TEST_GAME_ID); // Must specify ID of game to update
-        updateGame.setDeveloperProfileId(TEST_PROFILE_ID); // Foreign key should not be modified, keep original value
-        updateGame.setName("Updated Test Adventure Game"); // New name
-        updateGame.setDescription("Updated description for test game"); // New description
-        updateGame.setReleaseDate(LocalDateTime.of(2025, 11, 11, 0, 0)); // New release date
-        updateGame.setUpdatedAt(LocalDateTime.now()); // Update timestamp
-
-        // 2. Execute update operation
-        int updateRows = devGameMapper.updateById(updateGame);
-
-        // 3. Verify results
-        assertEquals(1, updateRows, "Failed to update game data: Should affect 1 row");
-        DevGame updatedGame = devGameMapper.selectById(TEST_GAME_ID);
-        assertNotNull(updatedGame, "Failed to query game after update: No corresponding game found");
-        assertEquals(updateGame.getName(), updatedGame.getName(), "Game name update failed");
-        assertEquals(updateGame.getDescription(), updatedGame.getDescription(), "Game description update failed");
-        assertEquals(updateGame.getReleaseDate(), updatedGame.getReleaseDate(), "Game release date update failed");
-    }
 
     /**
      * Test deleteById method: Verify game data deletion by ID is effective

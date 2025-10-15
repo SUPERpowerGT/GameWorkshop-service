@@ -8,11 +8,10 @@ import java.util.Optional;
 
 @Repository
 public interface DevGameRepository {
-    void save(DevGame devGame);
 
     void insert(DevGame game);
 
-    void updateById(DevGame game);
+    void update(DevGame game);
 
     Optional<DevGame> findById(String id);
 

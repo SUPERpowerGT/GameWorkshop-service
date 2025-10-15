@@ -19,4 +19,6 @@ public interface DevGameRepository {
     List<DevGame> findByDeveloperProfileId(String developerProfileId);
 
     boolean deleteById(String id);
+
+    boolean existsById(String gameId);
 }

@@ -79,8 +79,8 @@ public class DevGameAssetRepositoryImpl implements DevGameAssetRepository {
     }
 
     @Override
-    public int deleteByGameId(String devGameId) {
-        return devGameAssetMapper.deleteByDevGameId(devGameId);
+    public void deleteByGameId(String devGameId) {
+        devGameAssetMapper.deleteByDevGameId(devGameId);
     }
 
     @Override

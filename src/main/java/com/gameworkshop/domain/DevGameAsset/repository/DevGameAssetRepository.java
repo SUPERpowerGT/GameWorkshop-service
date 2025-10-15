@@ -26,7 +26,7 @@ public interface DevGameAssetRepository {
 
     boolean deleteById(String id);
 
-    int deleteByGameId(String devGameId);
+    void deleteByGameId(String devGameId);
 
     long countByGameId(String devGameId);
 }

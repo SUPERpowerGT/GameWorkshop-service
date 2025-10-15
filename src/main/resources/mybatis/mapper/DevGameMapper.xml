@@ -72,5 +72,4 @@
     <delete id="deleteById" parameterType="string">
         DELETE FROM dev_game WHERE id = #{id}
     </delete>
-
 </mapper>

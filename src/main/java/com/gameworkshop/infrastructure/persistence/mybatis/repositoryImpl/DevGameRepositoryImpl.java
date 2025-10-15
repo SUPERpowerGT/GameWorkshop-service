@@ -52,4 +52,11 @@ public class DevGameRepositoryImpl implements DevGameRepository {
         devGameMapper.updateById(game);
     }
 
+    @Override
+    public boolean existsById(String gameId) {
+        Integer count = devGameMapper.countById(gameId);
+        return count != null && count > 0;
+    }
+
+
 }

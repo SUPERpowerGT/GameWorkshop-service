@@ -8,9 +8,13 @@ import com.gameworkshop.domain.DeveloperProfile.model.DeveloperProfile;
 import com.gameworkshop.domain.DeveloperProfile.repository.DeveloperProfileRepository;
 import com.gameworkshop.interfaces.dto.DevGameUploadRequest;
 import com.gameworkshop.interfaces.dto.DevGameResponse;
+import com.gameworkshop.interfaces.dto.OperationResult;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +27,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class DevGameApplicationService {
+    @Value("${app.asset-storage-path}")
+    private String assetStoragePath;
     private final DevGameRepository devGameRepository;
     private final DevGameAssetRepository devGameAssetRepository;
     private final DeveloperProfileRepository developerProfileRepository;
@@ -60,7 +66,7 @@ public class DevGameApplicationService {
             String safeUserId = sanitizePathSegment(userId);
             String safeGameName = sanitizePathSegment(gameName);
 
-            String basePath = "D:/Project/GameValutProject/game-assets/" + safeUserId + "/" + safeGameName + "/";
+            String basePath = assetStoragePath + safeUserId + "/" + safeGameName + "/";
             Path folder = Paths.get(basePath);
             Files.createDirectories(folder);
 
@@ -86,6 +92,26 @@ public class DevGameApplicationService {
             throw new RuntimeException("Failed to save asset: " + assetType, e);
         }
     }
+
+    @Transactional
+    public OperationResult deleteGame(String gameId) {
+        if (!devGameRepository.existsById(gameId)) {
+            return OperationResult.failure("Game not found: " + gameId);
+        }
+
+        try {
+            // 删除关联资源
+            devGameAssetRepository.deleteByGameId(gameId);
+
+            // 删除游戏本体
+            devGameRepository.deleteById(gameId);
+
+            return OperationResult.success("Game deleted successfully: " + gameId);
+        } catch (Exception e) {
+            return OperationResult.failure("Failed to delete game: " + e.getMessage());
+        }
+    }
+
 
     private String sanitizePathSegment(String input) {
         return input.replaceAll("[\\\\/:*?\"<>|]", "_");

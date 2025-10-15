@@ -3,6 +3,7 @@ server:
 
 app:
   asset-base-url: http://localhost:8081
+  asset-storage-path: D:/Project/GameValutProject/game-assets
 
 
 spring:

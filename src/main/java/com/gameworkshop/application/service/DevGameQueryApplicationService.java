@@ -5,6 +5,7 @@ import com.gameworkshop.domain.DevGame.repository.DevGameRepository;
 import com.gameworkshop.domain.DevGameAsset.model.DevGameAsset;
 import com.gameworkshop.domain.DevGameAsset.repository.DevGameAssetRepository;
 import com.gameworkshop.infrastructure.util.AssetUrlBuilder;
+import com.gameworkshop.interfaces.dto.DevGameListResponse;
 import com.gameworkshop.interfaces.dto.DevGameResponse;
 import com.gameworkshop.interfaces.dto.DevGameSummaryResponse;
 import lombok.RequiredArgsConstructor;
@@ -75,4 +76,40 @@ public class DevGameQueryApplicationService {
                 zipUrl
         );
     }
+
+    public DevGameListResponse listAllGames(int page, int pageSize) {
+        int offset = Math.max(page - 1, 0) * pageSize;
+
+        // 1️⃣ 查询分页数据与总数
+        List<DevGame> games = devGameRepository.findAllPaged(offset, pageSize);
+        long totalCount = devGameRepository.countAll();
+        int totalPages = (int) Math.ceil((double) totalCount / pageSize);
+
+        // 2️⃣ 封装每个游戏的封面图URL
+        List<DevGameSummaryResponse> summaries = games.stream().map(game -> {
+            String imageUrl = devGameAssetRepository
+                    .findFirstByGameIdAndType(game.getId(), "image")
+                    .map(asset -> assetUrlBuilder.buildDownloadUrl(asset.getId()))
+                    .orElse(null);
+
+            return new DevGameSummaryResponse(
+                    game.getId(),
+                    game.getName(),
+                    game.getDescription(),
+                    game.getReleaseDate(),
+                    game.getCreatedAt(),
+                    imageUrl
+            );
+        }).collect(Collectors.toList());
+
+        // 3️⃣ 构建响应体
+        return new DevGameListResponse(
+                summaries,
+                page,
+                pageSize,
+                totalCount,
+                totalPages
+        );
+    }
+
 }

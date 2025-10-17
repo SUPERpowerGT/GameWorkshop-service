@@ -1,6 +1,7 @@
 package com.gameworkshop.domain.DevGame.repository;
 
 import com.gameworkshop.domain.DevGame.model.DevGame;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,4 +21,8 @@ public interface DevGameRepository {
     boolean deleteById(String id);
 
     boolean existsById(String gameId);
+
+    List<DevGame> findAllPaged(@Param("offset") int offset, @Param("pageSize") int pageSize);
+
+    long countAll();
 }

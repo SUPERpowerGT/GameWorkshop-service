@@ -35,4 +35,7 @@ public interface DevGameMapper {
 
     int deleteById(String id);
 
+    List<DevGame> findAllPaged(@Param("offset") int offset, @Param("pageSize") int pageSize);
+
+    long countAll();
 }

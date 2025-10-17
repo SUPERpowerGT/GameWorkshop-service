@@ -47,5 +47,15 @@ public class DevGameRepositoryImpl implements DevGameRepository {
         return count != null && count > 0;
     }
 
+    @Override
+    public List<DevGame> findAllPaged(int offset, int pageSize) {
+        return devGameMapper.findAllPaged(offset, pageSize);
+    }
+
+    @Override
+    public long countAll() {
+        return devGameMapper.countAll();
+    }
+
 
 }

@@ -74,4 +74,17 @@
     <delete id="deleteById" parameterType="string">
         DELETE FROM dev_game WHERE id = #{id}
     </delete>
+
+    <!-- ✅ 分页查询 -->
+    <select id="findAllPaged" resultType="com.gameworkshop.domain.DevGame.model.DevGame">
+        SELECT *
+        FROM dev_game
+        ORDER BY created_at DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <!-- ✅ 统计总数 -->
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*) FROM dev_game
+    </select>
 </mapper>

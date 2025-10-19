@@ -20,8 +20,8 @@ spring:
       idle-timeout: 600000
   servlet:
     multipart:
-      max-file-size: 200MB
-      max-request-size: 210MB
+      max-file-size: 1000MB
+      max-request-size: 1000MB
       enabled: true
   data:
     redis:

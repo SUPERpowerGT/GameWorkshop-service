@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace 必须和接口的包名 + 类名完全一致 -->
+<mapper namespace="com.gameworkshop.infrastructure.persistence.mybatis.mapper.DevGameStatisticsMapper">
+
+    <!-- 查询 -->
+    <select id="findByGameId"
+            parameterType="string"
+            resultType="com.gameworkshop.domain.DevGameStatistics.model.DevGameStatistics">
+        SELECT *
+        FROM dev_game_statistics
+        WHERE game_id = #{gameId}
+    </select>
+
+    <!-- 插入 -->
+    <insert id="insert"
+            parameterType="com.gameworkshop.domain.DevGameStatistics.model.DevGameStatistics">
+        INSERT INTO dev_game_statistics
+            (id, game_id, view_count, download_count, rating, updated_at)
+        VALUES
+            (#{id}, #{gameId}, #{viewCount}, #{downloadCount}, #{rating}, #{updatedAt})
+    </insert>
+
+    <!-- 更新 -->
+    <update id="updateCounts">
+        UPDATE dev_game_statistics
+        SET
+            view_count = view_count + #{viewIncrement},
+            download_count = download_count + #{downloadIncrement},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE game_id = #{gameId}
+    </update>
+
+</mapper>

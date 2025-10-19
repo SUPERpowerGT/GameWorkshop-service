@@ -5,14 +5,13 @@ app:
   asset-base-url: http://localhost:8081
   asset-storage-path: D:/Project/GameValutProject/game-assets
 
-
 spring:
   application:
-    name: GameWorkshop-service
+    name: GameVault-Developer-Service
   datasource:
-    url: jdbc:postgresql://localhost:5432/game_workshop_db
-    username: postgres
-    password: 123
+    url: jdbc:postgresql://localhost:12010/gamevault_developer_db
+    username: gamevault_developer_user
+    password: gamevault_developer_pass
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -24,6 +23,12 @@ spring:
       max-file-size: 200MB
       max-request-size: 210MB
       enabled: true
+  data:
+    redis:
+      host: localhost
+      port: 12013
+      database: 0
+      timeout: 2000
 
 mybatis:
   mapper-locations: classpath*:mybatis/mapper/**/*.xml

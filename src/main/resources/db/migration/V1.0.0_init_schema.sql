@@ -30,3 +30,29 @@ create table dev_game_asset(
                                uploaded_at timestamp not null default now()
 );
 create INDEX idx_dev_game_asset_game_type ON dev_game_asset(dev_game_id, asset_type);
+
+CREATE TABLE dev_game_statistics (
+                                     id VARCHAR(36) PRIMARY KEY,
+                                     game_id VARCHAR(36) NOT NULL UNIQUE REFERENCES dev_game(id),
+                                     view_count INT DEFAULT 0,
+                                     download_count INT DEFAULT 0,
+                                     rating DOUBLE PRECISION DEFAULT 0,
+                                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE developer_profile
+    ALTER COLUMN id TYPE VARCHAR(64),
+    ALTER COLUMN user_id TYPE VARCHAR(64);
+
+ALTER TABLE dev_game
+    ALTER COLUMN id TYPE VARCHAR(64),
+    ALTER COLUMN developer_profile_id TYPE VARCHAR(64);
+
+ALTER TABLE dev_game_asset
+    ALTER COLUMN id TYPE VARCHAR(64),
+    ALTER COLUMN dev_game_id TYPE VARCHAR(64);
+
+ALTER TABLE dev_game_statistics
+    ALTER COLUMN id TYPE VARCHAR(64),
+    ALTER COLUMN game_id TYPE VARCHAR(64);
+

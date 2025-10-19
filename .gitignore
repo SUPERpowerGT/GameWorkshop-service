@@ -1,33 +1,62 @@
+# =====================================
+# 🚀 GameWorkshop-service .gitignore
+# =====================================
+
+# --- Maven 构建产物 ---
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-### STS ###
+# --- Eclipse / Spring Tool Suite (STS) ---
 .apt_generated
 .classpath
 .factorypath
 .project
-.settings
+.settings/
 .springBeans
-.sts4-cache
+.sts4-cache/
 
-### IntelliJ IDEA ###
-.idea
+# --- IntelliJ IDEA ---
+.idea/
 *.iws
 *.iml
 *.ipr
 
-### NetBeans ###
+# --- NetBeans ---
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
+/build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
+# --- VS Code ---
 .vscode/
+
+# --- Docker ---
+# 持久化数据卷（不要上传数据库、redis 数据）
+docker/postgres/data/
+docker/redis/data/
+
+# 临时构建文件、运行时文件
+*.pid
+*.seed
+*.bak
+*.tmp
+
+# --- Logs ---
+*.log
+
+# --- 系统文件 ---
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+
+# --- 环境变量配置（若有） ---
+.env
+.env.local

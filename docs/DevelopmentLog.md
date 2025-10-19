@@ -1376,3 +1376,300 @@ game hub 展示功能
 ```
 
 ![image-20251016024638290](C:\Users\12912\AppData\Roaming\Typora\typora-user-images\image-20251016024638290.png)
+
+
+
+## 1019
+
+### 计划
+
+- game hub 热门下载展示功能
+- dashboard 查看游戏下载次数功能
+
+### 学习摘要
+
+#### 数据库重构
+
+🧩 一、目标
+
+我们要的是 👇
+
+| 项目       | 值                                      |
+| ---------- | --------------------------------------- |
+| 容器名     | `gamevault_developer_postgres`          |
+| 镜像       | `postgres:16`                           |
+| 数据库名   | `gamevault_developer_db`                |
+| 用户名     | `gamevault_developer_user`              |
+| 密码       | `gamevault_developer_pass`              |
+| 宿主机端口 | **12010**（Spring Boot、IDEA 都用这个） |
+
+🧱 二、文件结构
+
+请确保你的项目结构中有：
+
+```
+GameWorkshop-service/
+ ├─ docker/
+ │   └─ postgres/
+ │        └─ data/       ← 持久化目录
+ ├─ docker-compose.yml
+ └─ src/...
+```
+
+如果有旧的 data 目录，**务必删除**：
+
+```
+rm -rf ./docker/postgres/data
+```
+
+> Windows PowerShell:
+>
+> ```
+> Remove-Item -Recurse -Force .\docker\postgres\data
+> ```
+
+🧩 三、docker-compose.yml（请直接用这个版本）
+
+把你当前的文件替换成以下完整内容 👇：
+
+```
+version: "3.9"
+
+services:
+  # === PostgreSQL (Developer DB) ===
+  postgres:
+    image: postgres:16
+    container_name: gamevault_developer_postgres
+    restart: unless-stopped
+    ports:
+      - "12010:5432"
+    environment:
+      POSTGRES_DB: gamevault_developer_db
+      POSTGRES_USER: gamevault_developer_user
+      POSTGRES_PASSWORD: gamevault_developer_pass
+      TZ: Asia/Singapore
+    volumes:
+      - ./docker/postgres/data:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - gamevault_network
+
+  # === Redis (Developer Cache) ===
+  redis:
+    image: redis:alpine
+    container_name: gamevault_developer_redis
+    restart: always
+    ports:
+      - "12013:6379"
+    volumes:
+      - ./docker/redis/data:/data
+    networks:
+      - gamevault_network
+
+networks:
+  gamevault_network:
+    driver: bridge
+```
+
+🧩 四、启动容器
+
+运行以下命令：
+
+```
+docker compose down -v
+docker compose up -d
+```
+
+然后检查状态：
+
+```
+docker ps
+```
+
+应看到类似：
+
+```
+CONTAINER ID   IMAGE          PORTS                   NAMES
+a1b2c3d4e5f6   postgres:16    0.0.0.0:12010->5432/tcp gamevault_developer_postgres
+b2c3d4e5f6a7   redis:alpine   0.0.0.0:12013->6379/tcp gamevault_developer_redis
+```
+
+🧩 五、验证数据库是否创建成功
+
+执行：
+
+```
+docker exec -it gamevault_developer_postgres psql -U gamevault_developer_user -d gamevault_developer_db
+```
+
+成功后，你应看到：
+
+```
+gamevault_developer_db=>
+```
+
+输入以下命令验证：
+
+```
+\l        -- 列出所有数据库
+\c gamevault_developer_db   -- 进入当前数据库
+\dt       -- 查看是否有表
+```
+
+如果是空数据库，说明一切正常 ✅
+ （Spring Boot 启动后它会自动建表）
+
+🧩 六、配置 Spring Boot 连接
+
+在 `application.yml` 中：
+
+```
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:12010/gamevault_developer_db
+    username: gamevault_developer_user
+    password: gamevault_developer_pass
+    driver-class-name: org.postgresql.Driver
+```
+
+启动项目时看到类似：
+
+```
+HikariPool-1 - Start completed.
+Connected to PostgreSQL...
+```
+
+就说明连接成功 ✅。
+
+🧩 七、在 IDEA / pgAdmin 里连接
+
+| 字段     | 值                       |
+| -------- | ------------------------ |
+| Host     | localhost                |
+| Port     | 12010                    |
+| User     | gamevault_developer_user |
+| Password | gamevault_developer_pass |
+| Database | gamevault_developer_db   |
+
+点击「Test Connection」，应显示绿色 ✅。
+
+🧩 八、Redis 同理
+
+| Host | localhost |
+ | Port | 12013 |
+
+可用命令验证：
+
+```
+docker exec -it gamevault_developer_redis redis-cli
+PING
+```
+
+输出：
+
+```
+PONG
+```
+
+✅ 最终结果检查清单
+
+| 项目                  | 状态 |
+| --------------------- | ---- |
+| Docker 容器都启动     | ✅    |
+| 数据库能 `psql` 进入  | ✅    |
+| Spring Boot 连接正常  | ✅    |
+| IDEA / pgAdmin 能访问 | ✅    |
+
+
+
+Redis缓存持久化
+
+```
++--------------------------------------+           +-------------------------------------------+
+| 🎮 前端（Next.js / React + AntD）     |           | 🧱 后端（Spring Boot / DDD 架构）           |
++--------------------------------------+           +-------------------------------------------+
+             │                                            │
+             │ ① 用户访问游戏详情页                      │
+             │   GET /api/developer/devgame/public/{id}   │
+             │──────────────────────────────────────────▶│
+             │                                            ▼
+             │        [DevGamePublicController.getPublicGameDetail()]
+             │             ├─ 查询游戏详情（Game + Assets）
+             │             └─ 调用 DevGameStatisticsApplicationService.recordGameView()
+             │                                            │
+             │                                            ▼
+             │        [DevGameStatisticsApplicationService]
+             │             └─ 调用 Redis 缓存层           │
+             │                 cache.incrementView(gameId)│
+             │                                            │
+             │                                            ▼
+             │        [DevGameStatisticsCache]
+             │             └─ Redis INCR devgame:view:{gameId}
+             │                                            │
+             │──────────────────────────────────────────◀│
+             │                                            │
+             │ ② 用户点击 “下载游戏”                      │
+             │   GET /api/developer/devgameasset/download/{assetId}
+             │──────────────────────────────────────────▶│
+             │                                            ▼
+             │        [DevGameAssetDownloadController.downloadAsset()]
+             │             ├─ 查找 DevGameAsset by assetId
+             │             ├─ 如果 assetType == "zip" →
+             │             │     devGameStatisticsApplicationService.recordGameDownload(gameId)
+             │             ├─ Redis INCR devgame:download:{gameId}
+             │             └─ 返回文件流 (FileSystemResource)
+             │                                            │
+             │──────────────────────────────────────────◀│
+             │                                            │
+             │ ③ Redis 缓存结构（实时）                  │
+             │──────────────────────────────────────────▶│
+             │     🔹 devgame:view:{gameId}      → 浏览数累积
+             │     🔹 devgame:download:{gameId}  → 下载数累积
+             │──────────────────────────────────────────◀│
+             │                                            │
+             │ ④ 后台定时任务（每5分钟）                 │
+             │──────────────────────────────────────────▶│
+             │                                            ▼
+             │        [DevGameStatisticsSyncService.syncStatisticsFromRedis()]
+             │             ├─ cache.getKeysByPrefix("devgame:view:")
+             │             ├─ 遍历每个 gameId:
+             │             │     ├─ viewCount = getViewCount(gameId)
+             │             │     ├─ downloadCount = getDownloadCount(gameId)
+             │             │     └─ repository.insert / updateCounts()
+             │             └─ 日志输出同步完成 ✅
+             │                                            │
+             │──────────────────────────────────────────◀│
+             │                                            │
+             │ ⑤ PostgreSQL 表：dev_game_statistics       │
+             │──────────────────────────────────────────▶│
+             │     id (UUID)                              │
+             │     game_id                                │
+             │     view_count                             │
+             │     download_count                         │
+             │     rating                                 │
+             │     updated_at                             │
+             │──────────────────────────────────────────◀│
+             │                                            │
+             ▼                                            ▼
+     📊 Redis 实时缓存（快速响应） ✅       🗃 PostgreSQL 周期性同步（持久化） ✅
+
+```
+
+| 模块                                    | 作用                                                      | 主要方法                                            |
+| --------------------------------------- | --------------------------------------------------------- | --------------------------------------------------- |
+| **DevGameStatisticsApplicationService** | 负责业务层统计操作（recordGameView / recordGameDownload） | `incrementView()` / `incrementDownload()`           |
+| **DevGameStatisticsCache**              | 负责与 Redis 通信                                         | `opsForValue().increment("devgame:view:" + gameId)` |
+| **DevGameStatisticsSyncService**        | 定时任务，从 Redis 拉数据写入数据库                       | `@Scheduled(cron="0 */5 * * * *")`                  |
+| **DevGameAssetDownloadController**      | 文件下载接口，统计下载数                                  | `recordGameDownload()`                              |
+| **Redis**                               | 实时缓存计数（高性能）                                    | `devgame:view:xxx` / `devgame:download:xxx`         |
+| **PostgreSQL**                          | 最终持久化存储                                            | `dev_game_statistics` 表                            |
+
+| 时间点             | Redis 状态          | PostgreSQL 状态           |
+| ------------------ | ------------------- | ------------------------- |
+| T0（访问详情页）   | view:1              | —                         |
+| T1（用户下载）     | download:1          | —                         |
+| T5（定时任务执行） | view:1 / download:1 | ✅ 同步入库                |
+| T6（下一次访问）   | view:2 / download:1 | PostgreSQL 等待下一次同步 |
+
+前端访问游戏详情界面会把数据缓存到redis计数（key value），每隔5min会自动持久化到数据库中方便后面dashboard
+

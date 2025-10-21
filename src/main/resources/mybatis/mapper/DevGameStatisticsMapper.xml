@@ -3,28 +3,67 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<!-- namespace 必须和接口的包名 + 类名完全一致 -->
+<!-- ======================================================
+     DevGameStatisticsMapper.xml
+     用于 DevGameStatistics 统计数据的 CRUD 操作
+     ====================================================== -->
 <mapper namespace="com.gameworkshop.infrastructure.persistence.mybatis.mapper.DevGameStatisticsMapper">
 
-    <!-- 查询 -->
+    <!-- ===========================
+         通用结果映射
+         =========================== -->
+    <resultMap id="DevGameStatisticsResultMap" type="com.gameworkshop.domain.DevGameStatistics.model.DevGameStatistics">
+        <id property="id" column="id"/>
+        <result property="gameId" column="game_id"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="downloadCount" column="download_count"/>
+        <result property="rating" column="rating"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- ===========================
+         1️⃣ 根据 gameId 查询统计信息
+         =========================== -->
     <select id="findByGameId"
             parameterType="string"
-            resultType="com.gameworkshop.domain.DevGameStatistics.model.DevGameStatistics">
-        SELECT *
+            resultMap="DevGameStatisticsResultMap">
+        SELECT
+            id,
+            game_id,
+            view_count,
+            download_count,
+            rating,
+            updated_at
         FROM dev_game_statistics
         WHERE game_id = #{gameId}
+        LIMIT 1
     </select>
 
-    <!-- 插入 -->
+    <!-- ===========================
+         2️⃣ 插入新统计记录
+         =========================== -->
     <insert id="insert"
             parameterType="com.gameworkshop.domain.DevGameStatistics.model.DevGameStatistics">
-        INSERT INTO dev_game_statistics
-            (id, game_id, view_count, download_count, rating, updated_at)
-        VALUES
-            (#{id}, #{gameId}, #{viewCount}, #{downloadCount}, #{rating}, #{updatedAt})
+        INSERT INTO dev_game_statistics (
+            id,
+            game_id,
+            view_count,
+            download_count,
+            rating,
+            updated_at
+        ) VALUES (
+                     #{id},
+                     #{gameId},
+                     #{viewCount},
+                     #{downloadCount},
+                     #{rating},
+                     #{updatedAt}
+                 )
     </insert>
 
-    <!-- 更新 -->
+    <!-- ===========================
+         3️⃣ 更新统计字段（浏览量 & 下载量）
+         =========================== -->
     <update id="updateCounts">
         UPDATE dev_game_statistics
         SET
